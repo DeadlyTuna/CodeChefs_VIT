@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { chatService } from '@/lib/services/chatService';
 import { postsService, Post, PostComment } from '@/lib/services/postsService';
 import { supabase } from '@/lib/supabase/client';
+import type { Database } from '@/lib/supabase/database.types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -187,7 +188,10 @@ export default function ChatPage() {
             // Create or get conversation
             const { data: newConv, error } = await supabase
                 .from('conversations')
-                .insert({ name: searchEmail.split('@')[0], is_group: false })
+                .insert({
+                    name: searchEmail.split('@')[0],
+                    is_group: false
+                } as any)
                 .select()
                 .single();
 
@@ -195,9 +199,9 @@ export default function ChatPage() {
 
             // Add participants
             await supabase.from('conversation_participants').insert([
-                { conversation_id: newConv.id, user_id: user!.id },
-                { conversation_id: newConv.id, user_id: users.id },
-            ]);
+                { conversation_id: (newConv as any).id, user_id: user!.id },
+                { conversation_id: (newConv as any).id, user_id: users.id },
+            ] as any);
 
             setSearchEmail('');
             setNewDMDialogOpen(false);
@@ -218,7 +222,7 @@ export default function ChatPage() {
             // Create group conversation
             const { data: newConv, error } = await supabase
                 .from('conversations')
-                .insert({ name: groupName, is_group: true })
+                .insert({ name: groupName, is_group: true } as any)
                 .select()
                 .single();
 
@@ -226,14 +230,14 @@ export default function ChatPage() {
 
             // Add current user and selected members
             const participants = [
-                { conversation_id: newConv.id, user_id: user!.id },
+                { conversation_id: (newConv as any).id, user_id: user!.id },
                 ...selectedMembers.map(memberId => ({
-                    conversation_id: newConv.id,
+                    conversation_id: (newConv as any).id,
                     user_id: memberId,
                 })),
             ];
 
-            await supabase.from('conversation_participants').insert(participants);
+            await supabase.from('conversation_participants').insert(participants as any);
 
             setGroupName('');
             setSelectedMembers([]);
@@ -388,8 +392,8 @@ export default function ChatPage() {
                                 key={conv.id}
                                 onClick={() => handleSelectChat(conv)}
                                 className={`p-3 rounded-lg cursor-pointer transition-colors ${selectedChat?.id === conv.id
-                                        ? 'bg-blue-100 dark:bg-blue-900/30'
-                                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                                    ? 'bg-blue-100 dark:bg-blue-900/30'
+                                    : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
@@ -541,8 +545,8 @@ export default function ChatPage() {
                                     >
                                         <div
                                             className={`max-w-xs p-3 rounded-2xl ${msg.sender_id === user?.id
-                                                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
-                                                    : 'bg-gray-200 dark:bg-gray-800 dark:text-white'
+                                                ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                                                : 'bg-gray-200 dark:bg-gray-800 dark:text-white'
                                                 }`}
                                         >
                                             <p className="text-sm">{msg.content}</p>
