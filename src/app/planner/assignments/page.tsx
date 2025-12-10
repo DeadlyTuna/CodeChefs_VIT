@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { plannerService } from '@/lib/services/plannerService';
@@ -15,7 +15,7 @@ import { Plus, CheckSquare, Square, Clock, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
-export default function PlannerAssignmentsPage() {
+function AssignmentsContent() {
     const { user } = useAuthStore();
     const searchParams = useSearchParams();
     const subjectFilter = searchParams.get('subject');
@@ -250,5 +250,13 @@ export default function PlannerAssignmentsPage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function PlannerAssignmentsPage() {
+    return (
+        <Suspense fallback={<div className="container mx-auto p-6 max-w-6xl">Loading...</div>}>
+            <AssignmentsContent />
+        </Suspense>
     );
 }

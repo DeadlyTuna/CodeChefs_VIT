@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { plannerService } from '@/lib/services/plannerService';
@@ -13,7 +13,7 @@ import { Plus, CheckCircle, XCircle, Calendar as CalendarIcon } from 'lucide-rea
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
-export default function PlannerAttendancePage() {
+function AttendanceContent() {
     const { user } = useAuthStore();
     const searchParams = useSearchParams();
     const subjectFilter = searchParams.get('subject');
@@ -187,5 +187,13 @@ export default function PlannerAttendancePage() {
                 )}
             </div>
         </div>
+    );
+}
+
+export default function PlannerAttendancePage() {
+    return (
+        <Suspense fallback={<div className="container mx-auto p-6 max-w-6xl">Loading...</div>}>
+            <AttendanceContent />
+        </Suspense>
     );
 }
